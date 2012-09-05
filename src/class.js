@@ -1,6 +1,6 @@
 /**
  * gamecore.js - Copyright 2012 Playcraft Labs, Inc. (see licence.txt)
-  * class.js
+ * class.js
  * Classes and objects
  */
 
@@ -61,28 +61,25 @@
  */
 
 // compatible with jquery classing
-(function ($)
-{
-    var regs = {
-        undHash: /_|-/,
-        colons: /::/,
-        words: /([A-Z]+)([A-Z][a-z])/g,
-        lowUp: /([a-z\d])([A-Z])/g,
-        dash: /([a-z\d])([A-Z])/g,
-        replacer: /\{([^\}]+)\}/g,
-        dot: /\./
-    },
-        getNext = function (current, nextPart, add)
-        {
+(function(window) {
+    var $ = window.jQuery || window.Zepto,
+        regs = {
+            undHash:/_|-/,
+            colons:/::/,
+            words:/([A-Z]+)([A-Z][a-z])/g,
+            lowUp:/([a-z\d])([A-Z])/g,
+            dash:/([a-z\d])([A-Z])/g,
+            replacer:/\{([^\}]+)\}/g,
+            dot:/\./
+        },
+        getNext = function (current, nextPart, add) {
             return current[nextPart] || ( add && (current[nextPart] = {}) );
         },
-        isContainer = function (current)
-        {
+        isContainer = function (current) {
             var type = typeof current;
             return type && (  type == 'function' || type == 'object' );
         },
-        getObject = function (objectName, roots, add)
-        {
+        getObject = function (objectName, roots, add) {
             var parts = objectName ? objectName.split(regs.dot) : [],
                 length = parts.length,
                 currents = $.isArray(roots) ? roots : [roots || window],
@@ -92,26 +89,20 @@
                 c = 0,
                 type;
 
-            if (length == 0)
-            {
+            if (length == 0) {
                 return currents[0];
             }
-            while (current = currents[c++])
-            {
-                for (i = 0; i < length - 1 && isContainer(current); i++)
-                {
+            while (current = currents[c++]) {
+                for (i = 0; i < length - 1 && isContainer(current); i++) {
                     current = getNext(current, parts[i], add);
                 }
-                if (isContainer(current))
-                {
+                if (isContainer(current)) {
 
                     ret = getNext(current, parts[i], add);
 
-                    if (ret !== undefined)
-                    {
+                    if (ret !== undefined) {
 
-                        if (add === false)
-                        {
+                        if (add === false) {
                             delete current[parts[i]];
                         }
                         return ret;
@@ -122,125 +113,113 @@
             }
         },
 
+    /**
+     * @class jQuery.String
+     *
+     * A collection of useful string helpers.
+     *
+     */
+    str = $.String = $.extend($.String || {}, {
         /**
-         * @class jQuery.String
-         *
-         * A collection of useful string helpers.
-         *
+         * @function
+         * Gets an object from a string.
+         * @param {String} name the name of the object to look for
+         * @param {Array} [roots] an array of root objects to look for the name
+         * @param {Boolean} [add] true to add missing objects to
+         *  the path. false to remove found properties. undefined to
+         *  not modify the root object
          */
-            str = $.String = $.extend($.String || {}, {
-            /**
-             * @function
-             * Gets an object from a string.
-             * @param {String} name the name of the object to look for
-             * @param {Array} [roots] an array of root objects to look for the name
-             * @param {Boolean} [add] true to add missing objects to
-             *  the path. false to remove found properties. undefined to
-             *  not modify the root object
-             */
-            getObject: getObject,
-            /**
-             * Capitalizes a string
-             * @param {String} s the string.
-             * @return {String} a string with the first character capitalized.
-             */
-            capitalize: function (s, cache)
-            {
-                return s.charAt(0).toUpperCase() + s.substr(1);
-            },
-            /**
-             * Capitalizes a string from something undercored. Examples:
-             * @codestart
-             * jQuery.String.camelize("one_two") //-> "oneTwo"
-             * "three-four".camelize() //-> threeFour
-             * @codeend
-             * @param {String} s
-             * @return {String} a the camelized string
-             */
-            camelize: function (s)
-            {
-                s = str.classize(s);
-                return s.charAt(0).toLowerCase() + s.substr(1);
-            },
-            /**
-             * Like camelize, but the first part is also capitalized
-             * @param {String} s
-             * @return {String} the classized string
-             */
-            classize: function (s, join)
-            {
-                var parts = s.split(regs.undHash),
-                    i = 0;
-                for (; i < parts.length; i++)
-                {
-                    parts[i] = str.capitalize(parts[i]);
-                }
-
-                return parts.join(join || '');
-            },
-            /**
-             * Like [jQuery.String.classize|classize], but a space separates each 'word'
-             * @codestart
-             * jQuery.String.niceName("one_two") //-> "One Two"
-             * @codeend
-             * @param {String} s
-             * @return {String} the niceName
-             */
-            niceName: function (s)
-            {
-                return str.classize(s, ' ');
-            },
-
-            /**
-             * Underscores a string.
-             * @codestart
-             * jQuery.String.underscore("OneTwo") //-> "one_two"
-             * @codeend
-             * @param {String} s
-             * @return {String} the underscored string
-             */
-            underscore: function (s)
-            {
-                return s.replace(regs.colons, '/').replace(regs.words, '$1_$2').replace(regs.lowUp, '$1_$2').replace(regs.dash, '_').toLowerCase();
-            },
-            /**
-             * Returns a string with {param} replaced values from data.
-             *
-             *     $.String.sub("foo {bar}",{bar: "far"})
-             *     //-> "foo far"
-             *
-             * @param {String} s The string to replace
-             * @param {Object} data The data to be used to look for properties.  If it's an array, multiple
-             * objects can be used.
-             * @param {Boolean} [remove] if a match is found, remove the property from the object
-             */
-            sub: function (s, data, remove)
-            {
-                var obs = [];
-                obs.push(s.replace(regs.replacer, function (whole, inside)
-                {
-                    //convert inside to type
-                    var ob = getObject(inside, data, typeof remove == 'boolean' ? !remove : remove),
-                        type = typeof ob;
-                    if ((type === 'object' || type === 'function') && type !== null)
-                    {
-                        obs.push(ob);
-                        return "";
-                    } else
-                    {
-                        return "" + ob;
-                    }
-                }));
-                return obs.length <= 1 ? obs[0] : obs;
+        getObject:getObject,
+        /**
+         * Capitalizes a string
+         * @param {String} s the string.
+         * @return {String} a string with the first character capitalized.
+         */
+        capitalize:function (s, cache) {
+            return s.charAt(0).toUpperCase() + s.substr(1);
+        },
+        /**
+         * Capitalizes a string from something undercored. Examples:
+         * @codestart
+         * jQuery.String.camelize("one_two") //-> "oneTwo"
+         * "three-four".camelize() //-> threeFour
+         * @codeend
+         * @param {String} s
+         * @return {String} a the camelized string
+         */
+        camelize:function (s) {
+            s = str.classize(s);
+            return s.charAt(0).toLowerCase() + s.substr(1);
+        },
+        /**
+         * Like camelize, but the first part is also capitalized
+         * @param {String} s
+         * @return {String} the classized string
+         */
+        classize:function (s, join) {
+            var parts = s.split(regs.undHash),
+                i = 0;
+            for (; i < parts.length; i++) {
+                parts[i] = str.capitalize(parts[i]);
             }
-        });
 
-})(jQuery || Zepto);
-(function ($)
-{
+            return parts.join(join || '');
+        },
+        /**
+         * Like [jQuery.String.classize|classize], but a space separates each 'word'
+         * @codestart
+         * jQuery.String.niceName("one_two") //-> "One Two"
+         * @codeend
+         * @param {String} s
+         * @return {String} the niceName
+         */
+        niceName:function (s) {
+            return str.classize(s, ' ');
+        },
 
+        /**
+         * Underscores a string.
+         * @codestart
+         * jQuery.String.underscore("OneTwo") //-> "one_two"
+         * @codeend
+         * @param {String} s
+         * @return {String} the underscored string
+         */
+        underscore:function (s) {
+            return s.replace(regs.colons, '/').replace(regs.words, '$1_$2').replace(regs.lowUp, '$1_$2').replace(regs.dash, '_').toLowerCase();
+        },
+        /**
+         * Returns a string with {param} replaced values from data.
+         *
+         *     $.String.sub("foo {bar}",{bar: "far"})
+         *     //-> "foo far"
+         *
+         * @param {String} s The string to replace
+         * @param {Object} data The data to be used to look for properties.  If it's an array, multiple
+         * objects can be used.
+         * @param {Boolean} [remove] if a match is found, remove the property from the object
+         */
+        sub:function (s, data, remove) {
+            var obs = [];
+            obs.push(s.replace(regs.replacer, function (whole, inside) {
+                //convert inside to type
+                var ob = getObject(inside, data, typeof remove == 'boolean' ? !remove : remove),
+                    type = typeof ob;
+                if ((type === 'object' || type === 'function') && type !== null) {
+                    obs.push(ob);
+                    return "";
+                } else {
+                    return "" + ob;
+                }
+            }));
+            return obs.length <= 1 ? obs[0] : obs;
+        }
+    });
+}(window));
+(function (window) {
     // if we are initializing a new class
-    var initializing = false,
+    var $ = window.jQuery || window.Zepto,
+        initializing = false,
         isFunction = $.isFunction,
         makeArray = isFunction($.makeArray) ? $.makeArray : function(obj) {
             var ret = []
@@ -255,14 +234,12 @@
         /**
          *
          */
-        cloneObject = function(object)
-        {
+        cloneObject = function (object) {
             if (!object || typeof(object) != 'object')
                 return object;
 
             // special case handling of array (deep copy them)
-            if (object instanceof Array)
-            {
+            if (object instanceof Array) {
                 var clone = [];
                 for (var c = 0; c < object.length; c++)
                     clone[c] = cloneObject(object[c]);
@@ -277,31 +254,25 @@
             }
         },
 
-        concatArgs = function (arr, args)
-        {
+        concatArgs = function (arr, args) {
             return arr.concat(makeArray(args));
         },
         // tests if we can get super in .toString()
-        fnTest = /xyz/.test(function ()
-        {
+        fnTest = /xyz/.test(function () {
             xyz;
         }) ? /\b_super\b/ : /.*/,
         // overwrites an object with methods, sets up _super
         // newProps - new properties
         // oldProps - where the old properties might be
         // addTo - what we are adding to
-        inheritProps = function (newProps, oldProps, addTo)
-        {
+        inheritProps = function (newProps, oldProps, addTo) {
             addTo = addTo || newProps
-            for (var name in newProps)
-            {
+            for (var name in newProps) {
                 // Check if we're overwriting an existing function
                 addTo[name] = isFunction(newProps[name]) &&
                     isFunction(oldProps[name]) &&
-                    fnTest.test(newProps[name]) ? (function (name, fn)
-                {
-                    return function ()
-                    {
+                    fnTest.test(newProps[name]) ? (function (name, fn) {
+                    return function () {
                         var tmp = this._super, ret;
 
                         // Add a new ._super() method that is the same method but on the super-class
@@ -576,10 +547,8 @@
          *
          */
 
-        clss = $.Class = function ()
-        {
-            if (arguments.length)
-            {
+            clss = $.Class = function () {
+            if (arguments.length) {
                 return clss.extend.apply(clss, arguments);
             }
         };
@@ -638,31 +607,27 @@
          * next function.
          * @return {Function} the callback function.
          */
-        callback: function (funcs)
-        {
+        callback:function (funcs) {
             //args that should be curried
             var args = makeArray(arguments),
                 self;
 
             funcs = args.shift();
 
-            if (!isArray(funcs))
-            {
+            if (!isArray(funcs)) {
                 funcs = [funcs];
             }
 
             self = this;
 
-            return function class_cb()
-            {
+            return function class_cb() {
                 var cur = concatArgs(args, arguments),
                     isString,
                     length = funcs.length,
                     f = 0,
                     func;
 
-                for (; f < length; f++)
-                {
+                for (; f < length; f++) {
                     func = funcs[f];
                     if (!func)
                         continue;
@@ -691,7 +656,7 @@
          *   @param {Object} [current=window] the object you want to look in.
          *   @return {Object} the object you are looking for.
          */
-        getObject: $.String.getObject,
+        getObject:$.String.getObject,
         /**
          * @function newInstance
          * Creates a new instance of the class.  This method is useful for creating new instances
@@ -703,8 +668,7 @@
          * @codeend
          * @return {class} instance of the class
          */
-        newInstance: function ()
-        {
+        newInstance:function () {
             var inst = this.rawInstance();
             var args;
 
@@ -746,8 +710,7 @@
          * @param {Object} staticProps the static properties of the new class
          * @param {Object} protoProps the prototype properties of the new class
          */
-        setup: function (baseClass, fullName)
-        {
+        setup:function (baseClass, fullName) {
             this.defaults = extend(true, {}, baseClass.defaults, this.defaults);
             if (this._types == undefined) this._types = [];
             this._types.push(this.fullName);
@@ -755,8 +718,7 @@
             this._fullTypeName += this.fullName + '|';
             return arguments;
         },
-        rawInstance: function ()
-        {
+        rawInstance:function () {
             initializing = true;
             var inst = new this();
             initializing = false;
@@ -778,17 +740,14 @@
          * @param {Object} [proto]  the new classes prototype functions
          * @return {jQuery.Class} returns the new class
          */
-        extend: function (fullName, klass, proto)
-        {
+        extend:function (fullName, klass, proto) {
             // figure out what was passed
-            if (typeof fullName != 'string')
-            {
+            if (typeof fullName != 'string') {
                 proto = klass;
                 klass = fullName;
                 fullName = null;
             }
-            if (!proto)
-            {
+            if (!proto) {
                 proto = klass;
                 klass = null;
             }
@@ -799,9 +758,8 @@
                 name, shortName, namespace, prototype;
 
             // append the isA function
-            this.isA = function(typeName)
-            {
-                return this._fullTypeName.indexOf('|'+typeName+'|') != -1;
+            this.isA = function (typeName) {
+                return this._fullTypeName.indexOf('|' + typeName + '|') != -1;
             };
 
             // Instantiate a base class (but only create the instance,
@@ -814,17 +772,14 @@
 
             // The dummy class constructor
 
-            function Class()
-            {
+            function Class() {
                 // All construction is actually done in the init method
                 if (initializing) return;
 
-                if (this.constructor !== Class && arguments.length)
-                { //we are being called w/o new
+                if (this.constructor !== Class && arguments.length) { //we are being called w/o new
                     return arguments.callee.extend.apply(arguments.callee, arguments)
-                } else
-                { //we are being called w/ new
-                                   // copy objects
+                } else { //we are being called w/ new
+                    // copy objects
 
                     return this.Class.newInstance.apply(this.Class, arguments)
                 }
@@ -839,17 +794,15 @@
             inheritProps(klass, this, Class);
 
             // do namespace stuff
-            if (fullName)
-            {
+            if (fullName) {
                 var parts = fullName.split(/\./);
                 var shortName = parts.pop();
 
                 // Martin Wells (playcraft): bug fix. Don't add a namespace object if the class name
                 // has no namespace elements (i.e. it's just "MyClass", not "MyProject.MyClass")
-                if (parts.length > 0)
-                {
+                if (parts.length > 0) {
                     current = clss.getObject(parts.join('.'), window, true),
-                    namespace = current;
+                        namespace = current;
                 }
 
                 current[shortName] = Class;
@@ -857,11 +810,11 @@
 
             // set things that can't be overwritten
             extend(Class, {
-                prototype: prototype,
-                namespace: namespace,
-                shortName: shortName,
-                constructor: Class,
-                fullName: fullName
+                prototype:prototype,
+                namespace:namespace,
+                shortName:shortName,
+                constructor:Class,
+                fullName:fullName
             });
 
             //make sure our prototype looks nice
@@ -880,8 +833,7 @@
 
             var args = Class.setup.apply(Class, concatArgs([_super_class], arguments));
 
-            if (Class.init)
-            {
+            if (Class.init) {
                 Class.init.apply(Class, args || []);
             }
 
@@ -990,6 +942,4 @@
      * @return {Function} the callback function
      */
         callback = clss.callback;
-
-
-})(jQuery || Zepto);
+}(window));
