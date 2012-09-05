@@ -235,14 +235,20 @@
             }
         });
 
-})(jQuery);
+})(jQuery || Zepto);
 (function ($)
 {
 
     // if we are initializing a new class
     var initializing = false,
-        makeArray = $.makeArray,
         isFunction = $.isFunction,
+        makeArray = isFunction($.makeArray) ? $.makeArray : function(obj) {
+            var ret = []
+            $.each(obj, function(i, a) {
+                ret[i] = a;
+            })
+            return ret;
+        },
         isArray = $.isArray,
         extend = $.extend,
 
@@ -986,4 +992,4 @@
         callback = clss.callback;
 
 
-})(jQuery);
+})(jQuery || Zepto);
