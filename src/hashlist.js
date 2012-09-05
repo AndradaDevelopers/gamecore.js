@@ -1,4 +1,3 @@
-
 /**
  * A map of linked lists mapped by a string value
  */
@@ -19,7 +18,7 @@ gamecore.HashList = gamecore.Base.extend('gamecore.HashList',
             if (list == null)
             {
                 // no list associated with this key yet, so let's make one
-                list = new pc.LinkedList();
+                list = new gamecore.LinkedList();
                 this.hashtable.put(key, list);
             }
             list.add(object);
