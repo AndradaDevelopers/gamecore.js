@@ -3,8 +3,8 @@ require 'json/pure'
 class Build < Thor  
   # This is the list of files to concatenate. The first file will appear at the top of the final file. All files are relative to the lib directory.
   FILES = [
-    "src/class.js", "src/gamecore.js", "src/device.js", "src/jhashtable.js", "src/hashlist.js", "src/linkedlist.js", "src/pooled.js", 
-    "src/perf.js", "src/stacktrace.js"   
+    "src/class.js", "src/gamecore.js", "src/device.js", "src/jhashtable.js", "src/hashlist.js", 
+    "src/linkedlist.js", "src/queue.js", "src/pooled.js", "src/perf.js", "src/stacktrace.js"   
   ]
   
   desc "dev", "Concatenate all the js files into /dist/gamecore-VERSION.js."
