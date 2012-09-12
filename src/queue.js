@@ -29,21 +29,21 @@ gamecore.Queue = gamecore.Base('gamecore.Queue',
 		},
 		pop: function() {
 			// if the queue is empty, return undefined
-          	if (this.queue.length == 0) return undefined;
+    	if (this.queue.length == 0) return undefined;
 
-          	// store the item at the front of the queue
-          	var item = this.queue[this.offset];
-          	//Remove memory footprint on very large sets
-          	this.queue[this.offset] = null;
+    	// store the item at the front of the queue
+    	var item = this.queue[this.offset];
+    	//Remove memory footprint on very large sets
+    	this.queue[this.offset] = null;
 
-          	// increment the offset and remove the free space if necessary
-          	if (++ this.offset * 2 >= this.queue.length){
-           		this.queue  = this.queue.slice(this.offset);
-            	this.offset = 0;
-          	}
+    	// increment the offset and remove the free space if necessary
+    	if (++ this.offset * 2 >= this.queue.length){
+     		this.queue  = this.queue.slice(this.offset);
+      	this.offset = 0;
+    	}
 
-          	// return the dequeued item
-          	return item;
+    	// return the dequeued item
+    	return item;
 		}
 	}
 );
